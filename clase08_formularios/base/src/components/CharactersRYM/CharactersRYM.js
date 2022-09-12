@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import CardRYM from '../CardRYM/CardRYM'
-import Formulario from '../Formulario/Formulario';
 
 class CharactersRYM extends Component{
     constructor(){
@@ -8,11 +7,13 @@ class CharactersRYM extends Component{
         this.state = {
             isLoaded:false,
             personajes:[],
+            personajesIniciales: [],
             nexturl:'',  //Para tener la página siguiente.
+            valor: ''
         }
     }
     componentDidMount(){
-        console.log("Me monté");
+        //console.log("Me monté");
         let url = 'https://rickandmortyapi.com/api/character';
 
         fetch(url)
@@ -22,6 +23,7 @@ class CharactersRYM extends Component{
                 this.setState({
                     isLoaded: true,
                     personajes: data.results,
+                    personajesIniciales: data.results, 
                     nextUrl: data.info.next, //Para tener la página siguiente.
                 })
             })
@@ -36,10 +38,11 @@ class CharactersRYM extends Component{
         fetch(url)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
+                //console.log(data);
                 this.setState({
                     personajes: this.state.personajes.concat(data.results),
                     nextUrl: data.info.next,  //Para tener la página siguiente.
+                    personajesIniciales: this.state.personajesIniciales.concat(data.results),
                 })
             })
             .catch( function (e){
@@ -54,11 +57,29 @@ class CharactersRYM extends Component{
         })
     }
 
+    prevenirRecarga(e){
+        e.preventDefault();
+    };
+
+    guardarCambios(e){
+        this.setState({valor: e.target.value},
+             () => this.filtrarPersonajes(this.state.valor));
+    };
+
+    filtrarPersonajes(texto) {
+        //const valor = this.state.valor.toLowerCase();
+        const personajesFiltrados = this.state.personajesIniciales.filter((personaje) => personaje.name.toLowerCase().includes(texto))
+        this.setState({personajes: personajesFiltrados});
+    };
+
     render(){
+        console.log(this.state.personajes);
         return(
             <React.Fragment>
                 <div className="row card-filter">
-                    <Formulario />
+                <form onSubmit={(e) => this.prevenirRecarga(e)}>
+                    <input type='text' onChange={(e) => this.guardarCambios(e)} value={this.state.valor} />
+                </form>
                     {/* Aquí colocá un componente con un formulario que permita filtrar las tarjetas en base a los que escriba el usuario */}
                 </div>                
                 <div className="row card-container">                
